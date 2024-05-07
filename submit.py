@@ -10,6 +10,7 @@ sc.setLogLevel("INFO")
 spark = SparkSession.builder.getOrCreate()
 
 spark = SparkSession.builder.getOrCreate()
+
 df = spark.createDataFrame(
     [
         (1, "foo"),

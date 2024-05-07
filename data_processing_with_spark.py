@@ -30,14 +30,15 @@ link_to_data_2 = "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.c
 
 # Load the d ata int a pyspark dataframe
 print("Load teh data into a pyspark dataframe")
-#df1 = spark.read.csv("dataset1.csv", header=True, inferSchema=True)
-#df2 = spark.read.csv("files/dataset_2.csv", header=True, inferSchema=True)
+df1 = spark.read.csv("dataset1.csv", header=True, inferSchema=True)
+df2 = spark.read.csv("files/dataset_2.csv", header=True, inferSchema=True)
 
-# Display the sc hema  of dataframe
+# Display the schema  of dataframe
 print("Display the schema of dataframe")
-#df1.printSchema()
-#df2.printSchema()
+df1.printSchema()
+df2.printSchema()
 
+from pyspark.sql.functions import year, quarter, to_date
 #Add a new column to each dataframe
 df1 = df1.withColumn('year', year(to_date('date_column', 'dd/MM/yyyy')))
 df2 = df2.withColumn('quarter', quarter(to_date('transaction_date','dd/MM/yyyy')))
@@ -88,3 +89,15 @@ from pyspark.sql.functions import avg
 average_value_per_quarter = df2.groupBy('quarter').agg(avg("transaction_value").alias("avg_trans_val"))
 #show the average transaction value for each quarter in df2    
 average_value_per_quarter.show()
+
+#Write average_value_per_quarter to a Hive table named quarterly_averages
+average_value_per_quarter.write.mode("overwrite").saveAsTable("quarterly_averages")
+
+# calculate the total transaction value for each year in df1.
+total_value_per_year = df1.groupBy('year').agg(sum("transaction_amount").alias("total_transaction_val"))
+
+# show the total transaction value for each year in df1.
+total_value_per_year.show()
+
+#Write total_value_per_year to HDFS in the CSV format
+total_value_per_year.write.mode("overwrite").csv("total_value_per_year.csv")
